@@ -109,6 +109,12 @@ body{background:var(--bg);font-family:'DM Mono',ui-monospace,'Cascadia Code','So
 .add-to-cart-btn{width:100%;background:var(--accent);color:#0f0f0f;border:none;border-radius:var(--r);padding:13px;font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
 .add-to-cart-btn:disabled{opacity:.35;cursor:default}
 .popup-cancel{width:100%;background:none;border:none;color:var(--text3);font-size:12px;padding:8px;cursor:pointer;margin-top:4px}
+.addon-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:6px}
+.addon-btn{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s}
+.addon-btn.selected{border-color:var(--accent);background:rgba(240,180,41,0.08)}
+.addon-btn-name{font-size:12px;color:var(--text)}
+.addon-btn-price{font-size:10px;color:var(--text3);margin-top:2px}
+.addon-btn.selected .addon-btn-price{color:var(--accent)}
 
 /* CART */
 .cart-section{background:var(--surface);border-top:1px solid var(--border);display:flex;flex-direction:column;max-height:220px}
@@ -190,6 +196,37 @@ body{background:var(--bg);font-family:'DM Mono',ui-monospace,'Cascadia Code','So
 .txn-time{font-size:12px;color:var(--text2)}
 .txn-amt{font-size:13px;color:var(--accent)}
 .txn-method{font-size:10px;color:var(--text3);text-align:right}
+/* HISTORY */
+.history-wrap{padding:14px 16px 80px;overflow-y:auto;flex:1}
+.history-search{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-size:12px;font-family:inherit;margin-bottom:12px;outline:none}
+.history-search::placeholder{color:var(--text3)}
+.history-filter-row{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px}
+.history-filter-row::-webkit-scrollbar{display:none}
+.hf-btn{flex-shrink:0;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:6px 12px;font-size:10px;color:var(--text3);cursor:pointer;font-family:inherit;letter-spacing:.05em;white-space:nowrap}
+.hf-btn.active{background:rgba(240,180,41,.12);border-color:var(--accent);color:var(--accent)}
+.history-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.history-card-header{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none}
+.history-card-left{display:flex;flex-direction:column;gap:2px}
+.history-order-no{font-size:12px;font-weight:500;color:var(--text)}
+.history-time{font-size:10px;color:var(--text3)}
+.history-card-right{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.history-total{font-size:13px;font-weight:500;color:var(--accent)}
+.history-method-badge{font-size:9px;padding:2px 7px;border-radius:10px;background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
+.history-expand{padding:12px 14px;border-top:1px solid var(--border);display:none}
+.history-expand.open{display:block}
+.history-item-row{display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;border-bottom:1px dashed rgba(255,255,255,.05)}
+.history-item-row:last-child{border-bottom:none}
+.history-item-name{font-size:11px;color:var(--text)}
+.history-item-sub{font-size:10px;color:var(--text3);margin-top:1px}
+.history-item-price{font-size:11px;color:var(--text2);white-space:nowrap;margin-left:8px}
+.history-footer-row{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:10px;padding-top:8px;border-top:1px solid var(--border)}
+.history-cashier-tag{font-size:10px;color:var(--text3);margin-top:2px}
+.history-empty{text-align:center;color:var(--text3);font-size:12px;padding:40px 20px}
+.history-summary-bar{display:flex;gap:8px;margin-bottom:14px}
+.hsb-card{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 10px;text-align:center}
+.hsb-val{font-size:14px;font-weight:500;color:var(--accent)}
+.hsb-lbl{font-size:9px;color:var(--text3);margin-top:2px;letter-spacing:.06em}
+
 
 /* ORDER TOTALS */
 .order-totals-title{font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin:14px 0 8px}
@@ -250,7 +287,7 @@ body{background:var(--bg);font-family:'DM Mono',ui-monospace,'Cascadia Code','So
   <div id="main-app" style="display:none;flex-direction:column;flex:1">
     <div class="topbar">
       <div>
-        <div class="topbar-brand">BABY BUBBLE POS</div>
+        <div class="topbar-brand">BABY BUBBLE</div>
         <div class="topbar-cashier" id="topbar-cashier" onclick="switchCashier()">— tap to switch</div>
       </div>
       <div class="topbar-time" id="clock">--:--</div>
@@ -259,6 +296,7 @@ body{background:var(--bg);font-family:'DM Mono',ui-monospace,'Cascadia Code','So
       <button class="tab active" onclick="switchTab('order')"><i class="ti ti-receipt"></i><br>Order</button>
       <button class="tab" onclick="switchTab('receipt')"><i class="ti ti-printer"></i><br>Receipt</button>
       <button class="tab" onclick="switchTab('summary')"><i class="ti ti-chart-bar"></i><br>Summary</button>
+      <button class="tab" onclick="switchTab('history')"><i class="ti ti-history"></i><br>History</button>
     </div>
 
     <!-- ORDER VIEW -->
@@ -290,7 +328,6 @@ body{background:var(--bg);font-family:'DM Mono',ui-monospace,'Cascadia Code','So
       <div class="pay-methods">
         <div class="pay-method selected" onclick="selectMethod(this,'Cash')"><span class="pay-method-icon">💵</span>Cash</div>
         <div class="pay-method" onclick="selectMethod(this,'GCash')"><span class="pay-method-icon">📱</span>GCash</div>
-        <div class="pay-method" onclick="selectMethod(this,'Card')"><span class="pay-method-icon">💳</span>Card</div>
         <div class="pay-method" onclick="selectMethod(this,'Maya')"><span class="pay-method-icon">🔷</span>Maya</div>
       </div>
       <div class="tender-display" id="tender-display">
@@ -366,6 +403,21 @@ body{background:var(--bg);font-family:'DM Mono',ui-monospace,'Cascadia Code','So
     </div>
   </div>
 
+  <!-- HISTORY VIEW -->
+  <div class="view" id="view-history">
+    <div class="history-wrap">
+      <input class="history-search" id="history-search" type="text" placeholder="🔍  Search order #, item, cashier..." oninput="renderHistory()">
+      <div class="history-filter-row" id="history-filters">
+        <button class="hf-btn active" onclick="setHistoryFilter('all',this)">All</button>
+        <button class="hf-btn" onclick="setHistoryFilter('Cash',this)">💵 Cash</button>
+        <button class="hf-btn" onclick="setHistoryFilter('GCash',this)">📱 GCash</button>
+        <button class="hf-btn" onclick="setHistoryFilter('Maya',this)">🔷 Maya</button>
+      </div>
+      <div class="history-summary-bar" id="history-summary-bar"></div>
+      <div id="history-list"><div class="history-empty">No transactions yet</div></div>
+    </div>
+  </div>
+
   <!-- FLAVOR POPUP -->
   <div class="popup-overlay" id="popup-overlay">
     <div class="popup-sheet">
@@ -379,6 +431,8 @@ body{background:var(--bg);font-family:'DM Mono',ui-monospace,'Cascadia Code','So
         <div class="size-row" id="size-row"></div>
         <div class="section-title">Flavor</div>
         <div class="flavor-grid" id="flavor-grid"></div>
+        <div class="section-title" style="margin-top:14px">Add-ons <span style="color:var(--text3);font-size:9px">(optional)</span></div>
+        <div class="addon-grid" id="addon-grid"></div>
       </div>
       <div class="popup-footer">
         <button class="add-to-cart-btn" id="add-to-cart-btn" onclick="addToCart()" disabled>Add to Order</button>
@@ -412,7 +466,7 @@ const MENU = [
     { name:'Frappe Cream Base 2', flavors:['Avocado','Charcoal','Choco Strawberry','Ube'], sizes:[{label:'16oz',price:69},{label:'22oz',price:79}] },
     { name:'Frappe Premium', flavors:['Nutella','Biscoff'], sizes:[{label:'22oz',price:99}] },
     { name:'Frappe Coffee Based', flavors:['Almond Coffee','Caramel Macchiato','Coffee Jelly','Hazelnut Coffee','Matcha Espresso','Vanilla Coffee'], sizes:[{label:'16oz',price:69},{label:'22oz',price:79}] },
-    { name:'Frappe Cheese Cake', flavors:['Cookies & Cream','Dark Choco','Matcha','Milo','Strawberry','Taro','Winter Melon'], sizes:[{label:'16oz',price:59},{label:'22oz',price:69}] }
+    { name:'Frappe Cheese Cake', flavors:['Cookies & Cream','Dark Choco','Matcha','Milo','Strawberry','Taro','Winter Melon'], sizes:[{label:'22oz',price:99}] }
   ]},
   { category:'Ice Cream Float', emoji:'🍦', items:[
     { name:'Ice Cream Float', flavors:['Soda','Coffee','Milk Tea'], sizes:[{label:'16oz',price:69},{label:'22oz',price:79}] }
@@ -432,7 +486,15 @@ let selectedCashierIdx=-1,activeCashier=null,newRole='Cashier',newColorIdx=0;
 
 // ── POS STATE ──────────────────────────────────────────────
 let cart=[],total=0,selectedMethod='Cash',tenderStr='',transactions=[],orderCounter=1001;
-let popupItem=null,popupSizeIdx=null,popupFlavors=[];
+const ADDONS=[
+  {name:'Pearl',price:9},
+  {name:'Nata',price:9},
+  {name:'Crushed Oreo',price:9},
+  {name:'Cheese Cake',price:15},
+  {name:'Espresso Shot',price:15},
+  
+];
+let popupItem=null,popupSizeIdx=null,popupFlavors=[],popupAddons=[];
 
 // ── AUTO-SAVE (localStorage) ───────────────────────────────
 const SAVE_KEY='babybubble_pos_v1';
@@ -531,7 +593,24 @@ function openPopup(name){
     ${f}
   </div>`).join('');
   document.getElementById('add-to-cart-btn').disabled=true;
+  // render add-ons
+  popupAddons=[];
+  document.getElementById('addon-grid').innerHTML=ADDONS.map((a,i)=>`
+    <div class="addon-btn" id="addon-${i}" onclick="toggleAddon(${i})">
+      <div class="addon-btn-name">${a.name}</div>
+      <div class="addon-btn-price">+₱${a.price}</div>
+    </div>`).join('');
   document.getElementById('popup-overlay').classList.add('open');
+}
+function toggleAddon(i){
+  const btn=document.getElementById('addon-'+i);
+  if(popupAddons.includes(i)){
+    popupAddons=popupAddons.filter(x=>x!==i);
+    btn.classList.remove('selected');
+  }else{
+    popupAddons.push(i);
+    btn.classList.add('selected');
+  }
 }
 function closePopup(){document.getElementById('popup-overlay').classList.remove('open');}
 function selectSize(i){
@@ -557,11 +636,14 @@ function checkPopupReady(){
 }
 function addToCart(){
   const size=popupItem.sizes[popupSizeIdx];
+  const addonsSelected=popupAddons.map(i=>ADDONS[i]);
+  const addonsTotal=addonsSelected.reduce((s,a)=>s+a.price,0);
+  const addonsLabel=addonsSelected.map(a=>a.name).join(', ');
 
   popupFlavors.forEach(flavor=>{
-    const key=popupItem.name+'|'+flavor+'|'+size.label;
+    const addonKey=addonsSelected.map(a=>a.name).join('+');
+    const key=popupItem.name+'|'+flavor+'|'+size.label+'|'+addonKey;
     const existing=cart.find(c=>c.key===key);
-
     if(existing){
       existing.qty++;
     }else{
@@ -570,7 +652,10 @@ function addToCart(){
         name:popupItem.name,
         flavor,
         size:size.label,
-        price:size.price,
+        price:size.price+addonsTotal,
+        basePrice:size.price,
+        addons:addonsSelected,
+        addonsLabel,
         qty:1
       });
     }
@@ -602,7 +687,7 @@ function renderCart(){
     html+=`<div class="cart-row">
       <div class="cart-row-info">
         <div class="cart-row-name">${c.name}</div>
-        <div class="cart-row-sub">${c.flavor} · ${c.size}</div>
+        <div class="cart-row-sub">${c.flavor} · ${c.size}${c.addonsLabel?` · <span style="color:var(--accent)">+${c.addonsLabel}</span>`:''}</div>
       </div>
       <div class="cart-row-qty">
         <button class="qty-btn" onclick="changeQty('${safeKey}',-1)">−</button>
@@ -857,6 +942,75 @@ clock();setInterval(clock,1000);
 renderCashierList();
 renderMenu();
 loadState();
+
+
+// ── HISTORY ────────────────────────────────────────────────
+let historyFilter='all';
+function setHistoryFilter(f,btn){
+  historyFilter=f;
+  document.querySelectorAll('.hf-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderHistory();
+}
+function renderHistory(){
+  const q=(document.getElementById('history-search')||{}).value||'';
+  const ql=q.toLowerCase();
+  let filtered=transactions.filter(t=>{
+    if(historyFilter!=='all' && t.method!==historyFilter) return false;
+    if(!ql) return true;
+    return t.orderNo.toString().includes(ql)||
+      t.cashier.toLowerCase().includes(ql)||
+      t.items.some(i=>i.name.toLowerCase().includes(ql)||i.flavor.toLowerCase().includes(ql));
+  });
+  // summary bar
+  const rev=filtered.reduce((s,t)=>s+t.total,0);
+  const bar=document.getElementById('history-summary-bar');
+  if(bar) bar.innerHTML=`
+    <div class="hsb-card"><div class="hsb-val">${filtered.length}</div><div class="hsb-lbl">Orders</div></div>
+    <div class="hsb-card"><div class="hsb-val">${fmt(rev)}</div><div class="hsb-lbl">Revenue</div></div>
+    <div class="hsb-card"><div class="hsb-val">${filtered.length?fmt(rev/filtered.length):'₱0'}</div><div class="hsb-lbl">Avg</div></div>
+  `;
+  const el=document.getElementById('history-list');
+  if(!el) return;
+  if(!filtered.length){el.innerHTML='<div class="history-empty">No transactions found</div>';return;}
+  el.innerHTML=filtered.map((t,idx)=>{
+    const d=new Date(t.time);
+    const timeStr=d.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit',hour12:true});
+    const dateStr=d.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'});
+    return `<div class="history-card">
+      <div class="history-card-header" onclick="toggleHistoryCard('hc-${idx}')">
+        <div class="history-card-left">
+          <div class="history-order-no">Order #${t.orderNo}</div>
+          <div class="history-time">${dateStr} · ${timeStr}</div>
+          <div class="history-cashier-tag">👤 ${t.cashier}</div>
+        </div>
+        <div class="history-card-right">
+          <div class="history-total">${fmt(t.total)}</div>
+          <div class="history-method-badge">${t.method}</div>
+          <div style="font-size:9px;color:var(--text3);margin-top:2px">${t.items.reduce((s,i)=>s+i.qty,0)} item(s) · tap to ${''}</div>
+        </div>
+      </div>
+      <div class="history-expand" id="hc-${idx}">
+        ${t.items.map(i=>`
+          <div class="history-item-row">
+            <div>
+              <div class="history-item-name">${i.name} x${i.qty}</div>
+              <div class="history-item-sub">${i.flavor} · ${i.size}${i.addonsLabel?' · <span style="color:var(--accent)">+'+i.addonsLabel+'</span>':''}</div>
+            </div>
+            <div class="history-item-price">${fmt(i.price*i.qty)}</div>
+          </div>`).join('')}
+        <div class="history-footer-row">
+          <span>Tendered: ${fmt(t.tendered)}</span>
+          <span>Change: <span style="color:var(--green)">${fmt(t.change)}</span></span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function toggleHistoryCard(id){
+  const el=document.getElementById(id);
+  if(el) el.classList.toggle('open');
+}
 
 // ── SERVICE WORKER (offline support) ──────────────────────
 if('serviceWorker' in navigator){
