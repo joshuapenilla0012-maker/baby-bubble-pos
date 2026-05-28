@@ -475,9 +475,14 @@ const MENU = [
     { name:'Frappe Premium', flavors:['Nutella','Biscoff'], sizes:[{label:'22oz',price:99}] },
     { name:'Frappe Coffee Based', flavors:['Almond Coffee','Caramel Macchiato','Coffee Jelly','Hazelnut Coffee','Matcha Espresso','Vanilla Coffee'], sizes:[{label:'16oz',price:69},{label:'22oz',price:79}] },
     { name:'Frappe Cheese Cake', flavors:['Cookies & Cream','Dark Choco','Matcha','Milo','Strawberry','Taro','Winter Melon'], sizes:[{label:'22oz',price:99}] }
-  ]}, 
+  ]},
   { category:'Ice Cream Float', emoji:'🍦', items:[
     { name:'Ice Cream Float', flavors:['Soda','Coffee','Milk Tea'], sizes:[{label:'16oz',price:69},{label:'22oz',price:79}] }
+  ]},
+  { category:'Snacks', emoji:'🍪', items:[
+    { name:'Muffin', flavors:['Original'], sizes:[{label:'1pc',price:40}] },
+    { name:'Cookie', flavors:['Original'], sizes:[{label:'1pc',price:28}] },
+    { name:'Nori Seaweed', flavors:['Original'], sizes:[{label:'1pc',price:20},{label:'3pcs',price:50}] }
   ]}
 ];
 
@@ -500,7 +505,6 @@ const ADDONS=[
   {name:'Crushed Oreo',price:9},
   {name:'Cheese Cake',price:15},
   {name:'Espresso Shot',price:15},
-  
 ];
 let popupItem=null,popupSizeIdx=null,popupFlavors=[],popupAddons=[];
 
@@ -552,7 +556,6 @@ function showSaveIndicator(msg){
   clearTimeout(el._t);
   el._t=setTimeout(()=>{el.style.opacity='0';el.style.transform='translateX(-50%) translateY(10px)';},1800);
 }
-// Save on page hide (tab switch, app backgrounded, browser close)
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveState();});
 window.addEventListener('beforeunload',saveState);
 
@@ -587,20 +590,17 @@ function openPopup(name){
   popupFlavors=[];
   document.getElementById('popup-title').textContent=name;
   document.getElementById('popup-subtitle').textContent='Choose size & one or more flavors';
-  // sizes
   const sr=document.getElementById('size-row');
   sr.innerHTML=popupItem.sizes.map((s,i)=>`
     <div class="size-opt" id="sopt${i}" onclick="selectSize(${i})">
       <div class="size-name">${s.label}</div>
       <div class="size-price">₱${s.price}</div>
     </div>`).join('');
-  // flavors
   document.getElementById('flavor-grid').innerHTML=popupItem.flavors.map((f,i)=>`
     <div class="flavor-opt" id="fopt${i}" onclick="toggleFlavor(${i},'${f.replace(/'/g,"\\'")}')">
       ${f}
     </div>`).join('');
   document.getElementById('add-to-cart-btn').disabled=true;
-  // add-ons
   popupAddons=[];
   document.getElementById('addon-grid').innerHTML=ADDONS.map((a,i)=>`
     <div class="addon-btn" id="addon-${i}" onclick="toggleAddon(${i})">
@@ -831,43 +831,24 @@ function updateSummary(){
   document.getElementById('txn-list').innerHTML =
 transactions.slice(0,5).map(t => `
   <div class="txn-row" style="display:block">
-    
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
       <div>
         <div class="txn-id">${t.orderNo} · ${t.cashier.split(' ')[0]}</div>
-        <div class="txn-time">
-          ${t.time.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'})}
-        </div>
+        <div class="txn-time">${t.time.toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'})}</div>
       </div>
-
       <div style="text-align:right">
         <div class="txn-amt">${fmt(t.total)}</div>
         <div class="txn-method">${t.method}</div>
       </div>
     </div>
-
     <div style="border-top:1px solid var(--border);padding-top:6px">
       ${t.items.map(i => `
         <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
-          <div style="color:var(--text2)">
-            ${i.name} - ${i.flavor}
-            <span style="color:var(--text3)">
-              (${i.size}) ×${i.qty}
-            </span>
-          </div>
-
-          <div style="color:var(--accent)">
-            ${fmt(i.price * i.qty)}
-          </div>
-        </div>
-      `).join('')}
+          <div style="color:var(--text2)">${i.name} - ${i.flavor}<span style="color:var(--text3)"> (${i.size}) ×${i.qty}</span></div>
+          <div style="color:var(--accent)">${fmt(i.price*i.qty)}</div>
+        </div>`).join('')}
     </div>
-
-  </div>
-`).join('') || `
-<div style="color:var(--text3);font-size:12px;text-align:center;padding:20px">
-  No transactions yet
-</div>`;
+  </div>`).join('') || '<div style="color:var(--text3);font-size:12px;text-align:center;padding:20px">No transactions yet</div>';
 }
 
 // ── CASHIER LOGIN ──────────────────────────────────────────
@@ -947,7 +928,6 @@ renderCashierList();
 renderMenu();
 loadState();
 
-
 // ── HISTORY ────────────────────────────────────────────────
 let historyFilter='all';
 function setHistoryFilter(f,btn){
@@ -966,7 +946,6 @@ function renderHistory(){
       t.cashier.toLowerCase().includes(ql)||
       t.items.some(i=>i.name.toLowerCase().includes(ql)||i.flavor.toLowerCase().includes(ql));
   });
-  // summary bar
   const rev=filtered.reduce((s,t)=>s+t.total,0);
   const bar=document.getElementById('history-summary-bar');
   if(bar) bar.innerHTML=`
@@ -991,7 +970,7 @@ function renderHistory(){
         <div class="history-card-right">
           <div class="history-total">${fmt(t.total)}</div>
           <div class="history-method-badge">${t.method}</div>
-          <div style="font-size:9px;color:var(--text3);margin-top:2px">${t.items.reduce((s,i)=>s+i.qty,0)} item(s) · tap to ${''}</div>
+          <div style="font-size:9px;color:var(--text3);margin-top:2px">${t.items.reduce((s,i)=>s+i.qty,0)} item(s)</div>
         </div>
       </div>
       <div class="history-expand" id="hc-${idx}">
