@@ -100,16 +100,10 @@ body{background:var(--bg);font-family:'DM Mono',ui-monospace,'Cascadia Code','So
 .size-name{font-size:12px;font-weight:500}
 .size-price{font-size:11px;color:var(--accent);margin-top:1px}
 
-/* FLAVOR TEXT INPUT */
-.flavor-input-wrap{position:relative}
-.flavor-text-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;color:var(--text);font-size:13px;font-family:'DM Mono',monospace;outline:none;transition:border-color .15s}
-.flavor-text-input:focus{border-color:var(--accent)}
-.flavor-text-input::placeholder{color:var(--text3)}
-.flavor-suggestions{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface2);border:1px solid var(--accent);border-radius:9px;z-index:10;max-height:160px;overflow-y:auto}
-.flavor-suggestions.open{display:block}
-.flavor-suggestion-item{padding:9px 12px;font-size:12px;color:var(--text2);cursor:pointer;border-bottom:1px solid var(--border)}
-.flavor-suggestion-item:last-child{border-bottom:none}
-.flavor-suggestion-item:hover,.flavor-suggestion-item.highlighted{background:rgba(240,180,41,0.10);color:var(--accent)}
+/* FLAVOR GRID */
+.flavor-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.flavor-opt{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:7px 4px;cursor:pointer;font-size:10px;text-align:center;transition:border-color .15s,background .1s;color:var(--text2);line-height:1.3}
+.flavor-opt.selected{border-color:var(--accent);background:rgba(240,180,41,0.08);color:var(--accent)}
 
 /* ADD-ONS */
 .addon-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
@@ -442,10 +436,7 @@ body{background:var(--bg);font-family:'DM Mono',ui-monospace,'Cascadia Code','So
         </div>
         <div>
           <div class="section-title">Flavor</div>
-          <div class="flavor-input-wrap">
-            <input class="flavor-text-input" id="flavor-text-input" type="text" placeholder="Type or pick a flavor…" autocomplete="off" oninput="onFlavorInput()" onfocus="onFlavorFocus()" onkeydown="onFlavorKey(event)">
-            <div class="flavor-suggestions" id="flavor-suggestions"></div>
-          </div>
+          <div class="flavor-grid" id="flavor-grid"></div>
         </div>
         <div>
           <div class="section-title">Add-ons <span style="color:var(--text3);font-size:9px">(optional)</span></div>
@@ -591,14 +582,12 @@ function renderMenu(){
 function findItem(name){
   for(const cat of MENU) for(const item of cat.items) if(item.name===name) return item;
 }
-let highlightedSuggIdx=-1;
 function openPopup(name){
   popupItem=findItem(name);
   popupSizeIdx=null;
   popupFlavors=[];
-  highlightedSuggIdx=-1;
   document.getElementById('popup-title').textContent=name;
-  document.getElementById('popup-subtitle').textContent='Choose size & flavor';
+  document.getElementById('popup-subtitle').textContent='Choose size & one or more flavors';
   // sizes
   const sr=document.getElementById('size-row');
   sr.innerHTML=popupItem.sizes.map((s,i)=>`
@@ -606,12 +595,13 @@ function openPopup(name){
       <div class="size-name">${s.label}</div>
       <div class="size-price">₱${s.price}</div>
     </div>`).join('');
-  // flavor text input
-  const inp=document.getElementById('flavor-text-input');
-  inp.value='';
-  closeSuggestions();
+  // flavors
+  document.getElementById('flavor-grid').innerHTML=popupItem.flavors.map((f,i)=>`
+    <div class="flavor-opt" id="fopt${i}" onclick="toggleFlavor(${i},'${f.replace(/'/g,"\\'")}')">
+      ${f}
+    </div>`).join('');
   document.getElementById('add-to-cart-btn').disabled=true;
-  // render add-ons
+  // add-ons
   popupAddons=[];
   document.getElementById('addon-grid').innerHTML=ADDONS.map((a,i)=>`
     <div class="addon-btn" id="addon-${i}" onclick="toggleAddon(${i})">
@@ -619,56 +609,16 @@ function openPopup(name){
       <div class="addon-btn-price">+₱${a.price}</div>
     </div>`).join('');
   document.getElementById('popup-overlay').classList.add('open');
-  setTimeout(()=>inp.focus(),80);
 }
-function onFlavorInput(){
-  const val=document.getElementById('flavor-text-input').value.trim().toLowerCase();
-  highlightedSuggIdx=-1;
-  if(!val){closeSuggestions();checkPopupReady();return;}
-  const matches=popupItem.flavors.filter(f=>f.toLowerCase().includes(val));
-  renderSuggestions(matches);
-  // direct match check
-  const exact=popupItem.flavors.find(f=>f.toLowerCase()===val);
-  popupFlavors=exact?[exact]:[];
-  checkPopupReady();
-}
-function onFlavorFocus(){
-  const val=document.getElementById('flavor-text-input').value.trim().toLowerCase();
-  if(!val) renderSuggestions(popupItem.flavors);
-}
-function onFlavorKey(e){
-  const box=document.getElementById('flavor-suggestions');
-  const items=box.querySelectorAll('.flavor-suggestion-item');
-  if(!items.length) return;
-  if(e.key==='ArrowDown'){e.preventDefault();highlightedSuggIdx=Math.min(highlightedSuggIdx+1,items.length-1);updateSuggHighlight(items);}
-  else if(e.key==='ArrowUp'){e.preventDefault();highlightedSuggIdx=Math.max(highlightedSuggIdx-1,0);updateSuggHighlight(items);}
-  else if(e.key==='Enter'&&highlightedSuggIdx>=0){e.preventDefault();pickFlavor(items[highlightedSuggIdx].textContent.trim());}
-  else if(e.key==='Escape'){closePopup();}
-}
-function updateSuggHighlight(items){
-  items.forEach((el,i)=>el.classList.toggle('highlighted',i===highlightedSuggIdx));
-  if(highlightedSuggIdx>=0) items[highlightedSuggIdx].scrollIntoView({block:'nearest'});
-}
-function renderSuggestions(list){
-  const box=document.getElementById('flavor-suggestions');
-  if(!list.length){closeSuggestions();return;}
-  box.innerHTML=list.map(f=>`<div class="flavor-suggestion-item" onclick="pickFlavor('${f.replace(/'/g,"\\'")}')">${f}</div>`).join('');
-  box.classList.add('open');
-}
-function closeSuggestions(){
-  const box=document.getElementById('flavor-suggestions');
-  box.classList.remove('open');
-  box.innerHTML='';
-}
-function pickFlavor(f){
-  document.getElementById('flavor-text-input').value=f;
-  popupFlavors=[f];
-  closeSuggestions();
+function toggleFlavor(i,f){
+  const exists=popupFlavors.includes(f);
+  if(exists) popupFlavors=popupFlavors.filter(x=>x!==f);
+  else popupFlavors.push(f);
+  document.getElementById(`fopt${i}`).classList.toggle('selected',!exists);
   checkPopupReady();
 }
 function handleOverlayClick(e){
   if(e.target===document.getElementById('popup-overlay')) closePopup();
-  else closeSuggestions();
 }
 function toggleAddon(i){
   const btn=document.getElementById('addon-'+i);
@@ -680,7 +630,7 @@ function toggleAddon(i){
     btn.classList.add('selected');
   }
 }
-function closePopup(){document.getElementById('popup-overlay').classList.remove('open');closeSuggestions();}
+function closePopup(){document.getElementById('popup-overlay').classList.remove('open');}
 function selectSize(i){
   popupSizeIdx=i;
   document.querySelectorAll('[id^=sopt]').forEach((el,j)=>el.classList.toggle('selected',j===i));
