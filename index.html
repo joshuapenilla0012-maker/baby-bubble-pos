@@ -82,39 +82,47 @@ body{background:var(--bg);font-family:'DM Mono',ui-monospace,'Cascadia Code','So
 .item-name{font-size:11px;color:var(--text2);display:block;line-height:1.3}
 .item-price{font-size:11px;color:var(--accent);display:block;margin-top:2px}
 
-/* FLAVOR POPUP */
-.popup-overlay{display:none;position:absolute;inset:0;background:rgba(0,0,0,0.75);z-index:30;align-items:flex-end}
+/* FLAVOR POPUP — centered text-box dialog */
+.popup-overlay{display:none;position:absolute;inset:0;background:rgba(0,0,0,0.72);z-index:30;align-items:center;justify-content:center;padding:20px}
 .popup-overlay.open{display:flex}
-.popup-sheet{background:var(--surface);border-radius:18px 18px 0 0;width:100%;max-height:88vh;display:flex;flex-direction:column}
-.popup-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0}
-.popup-header{padding:12px 16px 8px;border-bottom:1px solid var(--border)}
-.popup-title{font-size:14px;font-weight:500}
+.popup-sheet{background:var(--surface);border-radius:14px;width:100%;max-width:360px;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.6)}
+.popup-handle{display:none}
+.popup-header{padding:16px 18px 12px;border-bottom:1px solid var(--border)}
+.popup-title{font-size:15px;font-weight:500}
 .popup-subtitle{font-size:10px;color:var(--text3);margin-top:2px}
-.popup-body{overflow-y:auto;padding:12px 16px;flex:1}
-.section-title{font-size:9px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;margin-top:4px}
+.popup-body{padding:14px 18px 10px;display:flex;flex-direction:column;gap:12px}
+.section-title{font-size:9px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px}
 
 /* SIZE SELECTOR */
-.size-row{display:flex;gap:8px;margin-bottom:14px}
-.size-opt{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;transition:border-color .15s}
+.size-row{display:flex;gap:6px}
+.size-opt{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:7px 6px;text-align:center;cursor:pointer;transition:border-color .15s}
 .size-opt.selected{border-color:var(--accent)}
 .size-name{font-size:12px;font-weight:500}
-.size-price{font-size:11px;color:var(--accent);margin-top:2px}
+.size-price{font-size:11px;color:var(--accent);margin-top:1px}
 
-/* FLAVOR GRID */
-.flavor-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:14px}
-.flavor-opt{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:9px 8px;cursor:pointer;font-size:12px;text-align:center;transition:border-color .15s,background .1s;color:var(--text2)}
-.flavor-opt.selected{border-color:var(--accent);background:rgba(240,180,41,0.08);color:var(--accent)}
+/* FLAVOR TEXT INPUT */
+.flavor-input-wrap{position:relative}
+.flavor-text-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;color:var(--text);font-size:13px;font-family:'DM Mono',monospace;outline:none;transition:border-color .15s}
+.flavor-text-input:focus{border-color:var(--accent)}
+.flavor-text-input::placeholder{color:var(--text3)}
+.flavor-suggestions{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface2);border:1px solid var(--accent);border-radius:9px;z-index:10;max-height:160px;overflow-y:auto}
+.flavor-suggestions.open{display:block}
+.flavor-suggestion-item{padding:9px 12px;font-size:12px;color:var(--text2);cursor:pointer;border-bottom:1px solid var(--border)}
+.flavor-suggestion-item:last-child{border-bottom:none}
+.flavor-suggestion-item:hover,.flavor-suggestion-item.highlighted{background:rgba(240,180,41,0.10);color:var(--accent)}
 
-.popup-footer{padding:12px 16px 16px;border-top:1px solid var(--border)}
-.add-to-cart-btn{width:100%;background:var(--accent);color:#0f0f0f;border:none;border-radius:var(--r);padding:13px;font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
-.add-to-cart-btn:disabled{opacity:.35;cursor:default}
-.popup-cancel{width:100%;background:none;border:none;color:var(--text3);font-size:12px;padding:8px;cursor:pointer;margin-top:4px}
-.addon-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:6px}
-.addon-btn{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s}
+/* ADD-ONS */
+.addon-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.addon-btn{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:7px 4px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s}
 .addon-btn.selected{border-color:var(--accent);background:rgba(240,180,41,0.08)}
-.addon-btn-name{font-size:12px;color:var(--text)}
-.addon-btn-price{font-size:10px;color:var(--text3);margin-top:2px}
+.addon-btn-name{font-size:10px;color:var(--text)}
+.addon-btn-price{font-size:9px;color:var(--text3);margin-top:1px}
 .addon-btn.selected .addon-btn-price{color:var(--accent)}
+
+.popup-footer{padding:10px 18px 16px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
+.add-to-cart-btn{width:100%;background:var(--accent);color:#0f0f0f;border:none;border-radius:var(--r);padding:12px;font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer}
+.add-to-cart-btn:disabled{opacity:.35;cursor:default}
+.popup-cancel{width:100%;background:none;border:none;color:var(--text3);font-size:12px;padding:6px;cursor:pointer}
 
 /* CART */
 .cart-section{background:var(--surface);border-top:1px solid var(--border);display:flex;flex-direction:column;max-height:220px}
@@ -328,6 +336,7 @@ body{background:var(--bg);font-family:'DM Mono',ui-monospace,'Cascadia Code','So
       <div class="pay-methods">
         <div class="pay-method selected" onclick="selectMethod(this,'Cash')"><span class="pay-method-icon">💵</span>Cash</div>
         <div class="pay-method" onclick="selectMethod(this,'GCash')"><span class="pay-method-icon">📱</span>GCash</div>
+        <div class="pay-method" onclick="selectMethod(this,'Card')"><span class="pay-method-icon">💳</span>Card</div>
         <div class="pay-method" onclick="selectMethod(this,'Maya')"><span class="pay-method-icon">🔷</span>Maya</div>
       </div>
       <div class="tender-display" id="tender-display">
@@ -419,7 +428,7 @@ body{background:var(--bg);font-family:'DM Mono',ui-monospace,'Cascadia Code','So
   </div>
 
   <!-- FLAVOR POPUP -->
-  <div class="popup-overlay" id="popup-overlay">
+  <div class="popup-overlay" id="popup-overlay" onclick="handleOverlayClick(event)">
     <div class="popup-sheet">
       <div class="popup-handle"></div>
       <div class="popup-header">
@@ -427,12 +436,21 @@ body{background:var(--bg);font-family:'DM Mono',ui-monospace,'Cascadia Code','So
         <div class="popup-subtitle" id="popup-subtitle">Choose size & flavor</div>
       </div>
       <div class="popup-body">
-        <div class="section-title">Size</div>
-        <div class="size-row" id="size-row"></div>
-        <div class="section-title">Flavor</div>
-        <div class="flavor-grid" id="flavor-grid"></div>
-        <div class="section-title" style="margin-top:14px">Add-ons <span style="color:var(--text3);font-size:9px">(optional)</span></div>
-        <div class="addon-grid" id="addon-grid"></div>
+        <div>
+          <div class="section-title">Size</div>
+          <div class="size-row" id="size-row"></div>
+        </div>
+        <div>
+          <div class="section-title">Flavor</div>
+          <div class="flavor-input-wrap">
+            <input class="flavor-text-input" id="flavor-text-input" type="text" placeholder="Type or pick a flavor…" autocomplete="off" oninput="onFlavorInput()" onfocus="onFlavorFocus()" onkeydown="onFlavorKey(event)">
+            <div class="flavor-suggestions" id="flavor-suggestions"></div>
+          </div>
+        </div>
+        <div>
+          <div class="section-title">Add-ons <span style="color:var(--text3);font-size:9px">(optional)</span></div>
+          <div class="addon-grid" id="addon-grid"></div>
+        </div>
       </div>
       <div class="popup-footer">
         <button class="add-to-cart-btn" id="add-to-cart-btn" onclick="addToCart()" disabled>Add to Order</button>
@@ -480,7 +498,7 @@ const COLORS=[
   {bg:'#2e1e3d',text:'#b07bf0'},{bg:'#1e3a3a',text:'#6ecfcf'},
 ];
 let cashiers=[
-  {name:'Baby Bubble',role:'Staff',color:COLORS[0]},
+  {name:'Angelica',role:'Staff',color:COLORS[0]},
 ];
 let selectedCashierIdx=-1,activeCashier=null,newRole='Cashier',newColorIdx=0;
 
@@ -573,12 +591,14 @@ function renderMenu(){
 function findItem(name){
   for(const cat of MENU) for(const item of cat.items) if(item.name===name) return item;
 }
+let highlightedSuggIdx=-1;
 function openPopup(name){
   popupItem=findItem(name);
   popupSizeIdx=null;
   popupFlavors=[];
+  highlightedSuggIdx=-1;
   document.getElementById('popup-title').textContent=name;
-  document.getElementById('popup-subtitle').textContent='Choose size & one or more flavors';
+  document.getElementById('popup-subtitle').textContent='Choose size & flavor';
   // sizes
   const sr=document.getElementById('size-row');
   sr.innerHTML=popupItem.sizes.map((s,i)=>`
@@ -586,12 +606,10 @@ function openPopup(name){
       <div class="size-name">${s.label}</div>
       <div class="size-price">₱${s.price}</div>
     </div>`).join('');
-  // flavors
-  const fg=document.getElementById('flavor-grid');
-  fg.innerHTML=popupItem.flavors.map((f,i)=>`
-  <div class="flavor-opt" id="fopt${i}" onclick="toggleFlavor(${i},'${f.replace(/'/g,"\\'")}')">
-    ${f}
-  </div>`).join('');
+  // flavor text input
+  const inp=document.getElementById('flavor-text-input');
+  inp.value='';
+  closeSuggestions();
   document.getElementById('add-to-cart-btn').disabled=true;
   // render add-ons
   popupAddons=[];
@@ -601,6 +619,56 @@ function openPopup(name){
       <div class="addon-btn-price">+₱${a.price}</div>
     </div>`).join('');
   document.getElementById('popup-overlay').classList.add('open');
+  setTimeout(()=>inp.focus(),80);
+}
+function onFlavorInput(){
+  const val=document.getElementById('flavor-text-input').value.trim().toLowerCase();
+  highlightedSuggIdx=-1;
+  if(!val){closeSuggestions();checkPopupReady();return;}
+  const matches=popupItem.flavors.filter(f=>f.toLowerCase().includes(val));
+  renderSuggestions(matches);
+  // direct match check
+  const exact=popupItem.flavors.find(f=>f.toLowerCase()===val);
+  popupFlavors=exact?[exact]:[];
+  checkPopupReady();
+}
+function onFlavorFocus(){
+  const val=document.getElementById('flavor-text-input').value.trim().toLowerCase();
+  if(!val) renderSuggestions(popupItem.flavors);
+}
+function onFlavorKey(e){
+  const box=document.getElementById('flavor-suggestions');
+  const items=box.querySelectorAll('.flavor-suggestion-item');
+  if(!items.length) return;
+  if(e.key==='ArrowDown'){e.preventDefault();highlightedSuggIdx=Math.min(highlightedSuggIdx+1,items.length-1);updateSuggHighlight(items);}
+  else if(e.key==='ArrowUp'){e.preventDefault();highlightedSuggIdx=Math.max(highlightedSuggIdx-1,0);updateSuggHighlight(items);}
+  else if(e.key==='Enter'&&highlightedSuggIdx>=0){e.preventDefault();pickFlavor(items[highlightedSuggIdx].textContent.trim());}
+  else if(e.key==='Escape'){closePopup();}
+}
+function updateSuggHighlight(items){
+  items.forEach((el,i)=>el.classList.toggle('highlighted',i===highlightedSuggIdx));
+  if(highlightedSuggIdx>=0) items[highlightedSuggIdx].scrollIntoView({block:'nearest'});
+}
+function renderSuggestions(list){
+  const box=document.getElementById('flavor-suggestions');
+  if(!list.length){closeSuggestions();return;}
+  box.innerHTML=list.map(f=>`<div class="flavor-suggestion-item" onclick="pickFlavor('${f.replace(/'/g,"\\'")}')">${f}</div>`).join('');
+  box.classList.add('open');
+}
+function closeSuggestions(){
+  const box=document.getElementById('flavor-suggestions');
+  box.classList.remove('open');
+  box.innerHTML='';
+}
+function pickFlavor(f){
+  document.getElementById('flavor-text-input').value=f;
+  popupFlavors=[f];
+  closeSuggestions();
+  checkPopupReady();
+}
+function handleOverlayClick(e){
+  if(e.target===document.getElementById('popup-overlay')) closePopup();
+  else closeSuggestions();
 }
 function toggleAddon(i){
   const btn=document.getElementById('addon-'+i);
@@ -612,23 +680,10 @@ function toggleAddon(i){
     btn.classList.add('selected');
   }
 }
-function closePopup(){document.getElementById('popup-overlay').classList.remove('open');}
+function closePopup(){document.getElementById('popup-overlay').classList.remove('open');closeSuggestions();}
 function selectSize(i){
   popupSizeIdx=i;
   document.querySelectorAll('[id^=sopt]').forEach((el,j)=>el.classList.toggle('selected',j===i));
-  checkPopupReady();
-}
-function toggleFlavor(i,f){
-  const exists=popupFlavors.includes(f);
-
-  if(exists){
-    popupFlavors=popupFlavors.filter(x=>x!==f);
-  }else{
-    popupFlavors.push(f);
-  }
-
-  document.getElementById(`fopt${i}`).classList.toggle('selected',!exists);
-
   checkPopupReady();
 }
 function checkPopupReady(){
