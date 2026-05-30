@@ -24,6 +24,27 @@
 body{background:var(--bg);font-family:'DM Mono',ui-monospace,'Cascadia Code','Source Code Pro',Menlo,Consolas,'DejaVu Sans Mono',monospace;color:var(--text)}
 #app{max-width:390px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;position:relative}
 
+/* LANDSCAPE */
+@media (orientation:landscape){
+  #app{max-width:100%;min-height:100vh;flex-direction:row;flex-wrap:wrap}
+  .topbar{width:100%;order:0}
+  .tabs{width:100%;order:1}
+  .view#view-order{flex-direction:row;overflow:hidden}
+  .menu-scroll{flex:1;overflow-y:auto;height:calc(100vh - 88px)}
+  .cart-section{width:300px;max-height:calc(100vh - 88px);border-top:none;border-left:1px solid var(--border);display:flex;flex-direction:column}
+  .cart-items{flex:1;overflow-y:auto}
+  .pay-screen{flex-direction:row;flex-wrap:wrap;overflow-y:auto}
+  .pay-topbar{width:100%}
+  .due-display{width:50%;padding:10px 16px 4px}
+  .pay-methods{width:50%;padding:10px 16px 4px}
+  .tender-display{margin:0 8px 6px}
+  .numpad{gap:4px;margin-bottom:6px}
+  .nk{height:40px;font-size:17px}
+  .popup-sheet{max-height:92vh;overflow-y:auto}
+  .txn-edit-sheet{max-height:92vh}
+  .login-screen{max-width:400px;margin:0 auto}
+}
+
 /* LOGIN */
 .login-screen{display:flex;flex-direction:column;flex:1;padding:24px 20px}
 .login-logo{text-align:center;font-size:22px;font-weight:700;color:var(--accent);margin-bottom:4px;margin-top:12px}
@@ -1181,15 +1202,19 @@ self.addEventListener('fetch', e => {
     })).catch(() => caches.match(self.location.href))
   );
 });
-  `;
-  const blob=new Blob([sw],{type:'application/javascript'});
-  const swUrl=URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl).then(reg=>{
-    reg.addEventListener('updatefound',()=>{
-      showSaveIndicator('📦 Offline cache updated');
-    });
+`;
+  const encoded = 'data:text/javascript;base64,' + btoa(sw);
+  navigator.serviceWorker.register(encoded, {scope: './'}).then(() => {
     showSaveIndicator('✓ Offline ready');
-  }).catch(()=>{});
+  }).catch(err => {
+    // blob/data URL blocked — write sw to a real file path isn't possible here
+    // fallback: cache pages manually via Cache API directly
+    caches.open('babybubble-v2').then(cache => {
+      cache.add(location.href).then(() => {
+        showSaveIndicator('✓ Offline ready');
+      });
+    });
+  });
 }
 </script>
 </body>
