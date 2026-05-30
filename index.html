@@ -229,6 +229,40 @@ body{background:var(--bg);font-family:'DM Mono',ui-monospace,'Cascadia Code','So
 .hsb-val{font-size:14px;font-weight:500;color:var(--accent)}
 .hsb-lbl{font-size:9px;color:var(--text3);margin-top:2px;letter-spacing:.06em}
 
+/* TRANSACTION EDIT PANEL */
+.txn-edit-overlay{display:none;position:absolute;inset:0;background:rgba(0,0,0,0.75);z-index:40;align-items:flex-end}
+.txn-edit-overlay.open{display:flex}
+.txn-edit-sheet{background:var(--surface);border-radius:18px 18px 0 0;width:100%;max-height:90vh;display:flex;flex-direction:column}
+.txn-edit-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:10px auto 0}
+.txn-edit-header{padding:12px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.txn-edit-title{font-size:13px;font-weight:500}
+.txn-edit-orderno{font-size:10px;color:var(--text3);margin-top:2px}
+.txn-edit-close{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:0 2px}
+.txn-edit-body{overflow-y:auto;flex:1;padding:12px 16px}
+.txn-edit-section{font-size:9px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;margin-top:4px}
+.txn-edit-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)}
+.txn-edit-item:last-child{border-bottom:none}
+.txn-edit-item-info{flex:1;min-width:0}
+.txn-edit-item-name{font-size:12px}
+.txn-edit-item-sub{font-size:10px;color:var(--text3);margin-top:1px}
+.txn-edit-qty{display:flex;align-items:center;gap:5px}
+.txn-edit-price{font-size:12px;color:var(--accent);min-width:46px;text-align:right}
+.txn-edit-remove{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:6px;color:#ef4444;font-size:13px;width:24px;height:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.txn-edit-method-row{display:flex;gap:6px;margin-bottom:4px}
+.txn-edit-method-btn{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 4px;text-align:center;cursor:pointer;font-size:11px;color:var(--text2)}
+.txn-edit-method-btn.selected{border-color:var(--accent);color:var(--accent)}
+.txn-edit-footer{padding:10px 16px 18px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+.txn-edit-total{display:flex;justify-content:space-between;font-size:14px;font-weight:500;padding:6px 0}
+.txn-save-btn{width:100%;background:var(--accent);color:#0f0f0f;border:none;border-radius:var(--r);padding:12px;font-size:13px;font-weight:700;cursor:pointer}
+.txn-save-btn:disabled{opacity:.35;cursor:default}
+.txn-delete-btn{width:100%;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:var(--r);padding:10px;font-size:12px;color:#ef4444;cursor:pointer}
+
+/* History card action buttons */
+.history-actions{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.hact-btn{flex:1;padding:7px 4px;border-radius:8px;font-size:11px;cursor:pointer;text-align:center;font-family:inherit}
+.hact-edit{background:rgba(240,180,41,.1);border:1px solid rgba(240,180,41,.3);color:var(--accent)}
+.hact-delete{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#ef4444}
+
 
 /* ORDER TOTALS */
 .order-totals-title{font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin:14px 0 8px}
@@ -420,6 +454,35 @@ body{background:var(--bg);font-family:'DM Mono',ui-monospace,'Cascadia Code','So
     </div>
   </div>
 
+  <!-- TRANSACTION EDIT PANEL -->
+  <div class="txn-edit-overlay" id="txn-edit-overlay" onclick="handleTxnEditOverlay(event)">
+    <div class="txn-edit-sheet">
+      <div class="txn-edit-handle"></div>
+      <div class="txn-edit-header">
+        <div>
+          <div class="txn-edit-title">Edit Transaction</div>
+          <div class="txn-edit-orderno" id="txn-edit-orderno">—</div>
+        </div>
+        <button class="txn-edit-close" onclick="closeTxnEdit()">×</button>
+      </div>
+      <div class="txn-edit-body">
+        <div class="txn-edit-section">Payment Method</div>
+        <div class="txn-edit-method-row">
+          <div class="txn-edit-method-btn" onclick="selectEditMethod(this,'Cash')">💵 Cash</div>
+          <div class="txn-edit-method-btn" onclick="selectEditMethod(this,'GCash')">📱 GCash</div>
+          <div class="txn-edit-method-btn" onclick="selectEditMethod(this,'Maya')">🔷 Maya</div>
+        </div>
+        <div class="txn-edit-section" style="margin-top:14px">Items</div>
+        <div id="txn-edit-items"></div>
+      </div>
+      <div class="txn-edit-footer">
+        <div class="txn-edit-total"><span>NEW TOTAL</span><span id="txn-edit-total" style="color:var(--accent)">₱0.00</span></div>
+        <button class="txn-save-btn" id="txn-save-btn" onclick="saveTxnEdit()">Save Changes</button>
+        <button class="txn-delete-btn" onclick="deleteTxn()">🗑 Delete Transaction</button>
+      </div>
+    </div>
+  </div>
+
   <!-- FLAVOR POPUP -->
   <div class="popup-overlay" id="popup-overlay" onclick="handleOverlayClick(event)">
     <div class="popup-sheet">
@@ -464,14 +527,14 @@ const MENU = [
     { name:'Coffee Premium', flavors:['Almond Latte','Caramel Macchiato','Chocolate Latte','Hazelnut Latte','Matcha Latte','Vanilla Ice'], sizes:[{label:'16oz',price:39},{label:'22oz',price:49}] }
   ]},
   { category:'Fruit Soda', emoji:'🍓', items:[
-    { name:'Fruit Soda', flavors:['Blueberry','Green Apple','Kiwi','Strawberry','Lychee','Mango','Passion Fruit'], sizes:[{label:'16oz',price:39},{label:'22oz',price:49}] }
+    { name:'Fruit Soda', flavors:['Blueberry','Green Apple','Kiwi','Strawberry','Lychee','Mango','Passion Fruit'], sizes:[{label:'16oz',price:29},{label:'22oz',price:39}] }
   ]},
   { category:'Cheese Cake', emoji:'🍰', items:[
     { name:'Cheese Cake', flavors:['Cookies & Cream','Dark Choco','Matcha','Milo','Strawberry','Taro','Winter Melon'], sizes:[{label:'16oz',price:59},{label:'22oz',price:69}] }
   ]},
   { category:'Frappe', emoji:'🥤', items:[
     { name:'Frappe Cream Based', flavors:['Cookie & Cream','Dark Choco','Java Chip','Matcha','Milo','Rocky Road','Salted & Cream','Strawberry','Taro'], sizes:[{label:'16oz',price:59},{label:'22oz',price:69}] },
-    { name:'Frappe Cream Base Premium',  flavors:['Avocado','Charcoal','Choco Strawberry','Ube'], sizes:[{label:'16oz',price:69},{label:'22oz',price:79}] },
+    { name:'Frappe Cream Base 2',  flavors:['Avocado','Charcoal','Choco Strawberry','Ube'], sizes:[{label:'16oz',price:69},{label:'22oz',price:79}] },
     { name:'Frappe Premium', flavors:['Nutella','Biscoff'], sizes:[{label:'22oz',price:99}] },
     { name:'Frappe Coffee Based', flavors:['Almond Coffee','Caramel Macchiato','Coffee Jelly','Hazelnut Coffee','Matcha Espresso','Vanilla Coffee'], sizes:[{label:'16oz',price:69},{label:'22oz',price:79}] },
     { name:'Frappe Cheese Cake', flavors:['Cookies & Cream','Dark Choco','Matcha','Milo','Strawberry','Taro','Winter Melon'], sizes:[{label:'22oz',price:99}] }
@@ -480,9 +543,9 @@ const MENU = [
     { name:'Ice Cream Float', flavors:['Soda','Coffee','Milk Tea'], sizes:[{label:'16oz',price:69},{label:'22oz',price:79}] }
   ]},
   { category:'Snacks', emoji:'🍪', items:[
-    { name:'Muffin', flavors:['Original'], sizes:[{label:'1pc',price:50}] }
-    { name:'Cookies', flavors:['Original'], sizes:[{label:'1pc',price:28}] },
-    { name:'Nori Seaweed', flavors:['Original'], sizes:[{label:'1pc',price:18},{label:'3pcs',price:50}] }
+    { name:'Muffin', flavors:['Original'], sizes:[{label:'1pc',price:40}] },
+    { name:'Cookie', flavors:['Original'], sizes:[{label:'1pc',price:28}] },
+    { name:'Nori Seaweed', flavors:['Original'], sizes:[{label:'1pc',price:20},{label:'3pcs',price:50}] }
   ]}
 ];
 
@@ -986,6 +1049,10 @@ function renderHistory(){
           <span>Tendered: ${fmt(t.tendered)}</span>
           <span>Change: <span style="color:var(--green)">${fmt(t.change)}</span></span>
         </div>
+        <div class="history-actions">
+          <button class="hact-btn hact-edit" onclick="openTxnEdit(${transactions.indexOf(t)})">✏️ Edit</button>
+          <button class="hact-btn hact-delete" onclick="deleteTransactionAt(${transactions.indexOf(t)})">🗑 Delete</button>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -993,6 +1060,99 @@ function renderHistory(){
 function toggleHistoryCard(id){
   const el=document.getElementById(id);
   if(el) el.classList.toggle('open');
+}
+
+// ── TRANSACTION EDIT ──────────────────────────────────────
+let editTxnIdx=null, editItems=[], editMethod='Cash';
+
+function openTxnEdit(idx){
+  editTxnIdx=idx;
+  const t=transactions[idx];
+  editItems=t.items.map(i=>({...i}));
+  editMethod=t.method;
+  document.getElementById('txn-edit-orderno').textContent='Order '+t.orderNo+' · '+new Date(t.time).toLocaleString('en-PH',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  // method
+  document.querySelectorAll('.txn-edit-method-btn').forEach(b=>{
+    b.classList.toggle('selected', b.textContent.includes(editMethod));
+  });
+  renderEditItems();
+  document.getElementById('txn-edit-overlay').classList.add('open');
+}
+function closeTxnEdit(){
+  document.getElementById('txn-edit-overlay').classList.remove('open');
+  editTxnIdx=null; editItems=[];
+}
+function handleTxnEditOverlay(e){
+  if(e.target===document.getElementById('txn-edit-overlay')) closeTxnEdit();
+}
+function selectEditMethod(el,method){
+  editMethod=method;
+  document.querySelectorAll('.txn-edit-method-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function renderEditItems(){
+  const wrap=document.getElementById('txn-edit-items');
+  if(!editItems.length){
+    wrap.innerHTML='<div style="color:var(--text3);font-size:12px;text-align:center;padding:12px">No items — save will delete this transaction.</div>';
+    document.getElementById('txn-edit-total').textContent='₱0.00';
+    return;
+  }
+  wrap.innerHTML=editItems.map((item,i)=>`
+    <div class="txn-edit-item">
+      <div class="txn-edit-item-info">
+        <div class="txn-edit-item-name">${item.name}</div>
+        <div class="txn-edit-item-sub">${item.flavor} · ${item.size}${item.addonsLabel?' · <span style="color:var(--accent)">+'+item.addonsLabel+'</span>':''}</div>
+      </div>
+      <div class="txn-edit-qty">
+        <button class="qty-btn" onclick="editItemQty(${i},-1)">−</button>
+        <span class="qty-num">${item.qty}</span>
+        <button class="qty-btn" onclick="editItemQty(${i},1)">+</button>
+      </div>
+      <span class="txn-edit-price">${fmt(item.price*item.qty)}</span>
+      <button class="txn-edit-remove" onclick="editItemQty(${i},-999)">×</button>
+    </div>`).join('');
+  const newTotal=editItems.reduce((s,i)=>s+(i.price*i.qty),0);
+  document.getElementById('txn-edit-total').textContent=fmt(newTotal);
+}
+function editItemQty(i,delta){
+  editItems[i].qty+=delta;
+  if(editItems[i].qty<=0) editItems.splice(i,1);
+  renderEditItems();
+}
+function saveTxnEdit(){
+  if(editTxnIdx===null) return;
+  if(!editItems.length){ deleteTxn(); return; }
+  const t=transactions[editTxnIdx];
+  t.items=editItems.map(i=>({...i}));
+  t.total=editItems.reduce((s,i)=>s+(i.price*i.qty),0);
+  t.method=editMethod;
+  t.tendered=editMethod==='Cash'?Math.max(t.tendered,t.total):t.total;
+  t.change=Math.max(0,t.tendered-t.total);
+  closeTxnEdit();
+  updateSummary();
+  renderHistory();
+  scheduleSave();
+  showSaveIndicator('✓ Transaction updated');
+}
+function deleteTxn(){
+  if(editTxnIdx===null) return;
+  const orderNo=transactions[editTxnIdx].orderNo;
+  if(!confirm('Delete transaction '+orderNo+'? This cannot be undone.')) return;
+  transactions.splice(editTxnIdx,1);
+  closeTxnEdit();
+  updateSummary();
+  renderHistory();
+  scheduleSave();
+  showSaveIndicator('🗑 Transaction deleted');
+}
+function deleteTransactionAt(idx){
+  const orderNo=transactions[idx].orderNo;
+  if(!confirm('Delete transaction '+orderNo+'? This cannot be undone.')) return;
+  transactions.splice(idx,1);
+  updateSummary();
+  renderHistory();
+  scheduleSave();
+  showSaveIndicator('🗑 Transaction deleted');
 }
 
 // ── SERVICE WORKER (offline support) ──────────────────────
