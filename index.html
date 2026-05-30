@@ -119,7 +119,7 @@ body{background:var(--bg);font-family:'DM Mono',ui-monospace,'Cascadia Code','So
 .popup-cancel{width:100%;background:none;border:none;color:var(--text3);font-size:12px;padding:6px;cursor:pointer}
 
 /* CART */
-.cart-section{background:var(--surface);border-top:1px solid var(--border);display:flex;flex-direction:column;max-height:220px}
+.cart-section{background:var(--surface);border-top:1px solid var(--border);display:flex;flex-direction:column;max-height:340px}
 .cart-header{display:flex;align-items:center;justify-content:space-between;padding:7px 16px;border-bottom:1px solid var(--border)}
 .cart-label{font-size:10px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase}
 .cart-count{background:var(--accent-dim);color:var(--accent);font-size:11px;padding:2px 8px;border-radius:20px}
@@ -527,15 +527,15 @@ const MENU = [
     { name:'Coffee Premium', flavors:['Almond Latte','Caramel Macchiato','Chocolate Latte','Hazelnut Latte','Matcha Latte','Vanilla Ice'], sizes:[{label:'16oz',price:39},{label:'22oz',price:49}] }
   ]},
   { category:'Fruit Soda', emoji:'🍓', items:[
-    { name:'Fruit Soda', flavors:['Blueberry','Green Apple','Kiwi','Strawberry','Lychee','Mango','Passion Fruit'], sizes:[{label:'16oz',price:39},{label:'22oz',price:49}] }
+    { name:'Fruit Soda', flavors:['Blueberry','Green Apple','Kiwi','Strawberry','Lychee','Mango','Passion Fruit'], sizes:[{label:'16oz',price:29},{label:'22oz',price:39}] }
   ]},
   { category:'Cheese Cake', emoji:'🍰', items:[
     { name:'Cheese Cake', flavors:['Cookies & Cream','Dark Choco','Matcha','Milo','Strawberry','Taro','Winter Melon'], sizes:[{label:'16oz',price:59},{label:'22oz',price:69}] }
   ]},
   { category:'Frappe', emoji:'🥤', items:[
     { name:'Frappe Cream Based', flavors:['Cookie & Cream','Dark Choco','Java Chip','Matcha','Milo','Rocky Road','Salted & Cream','Strawberry','Taro'], sizes:[{label:'16oz',price:59},{label:'22oz',price:69}] },
-    { name:'Frappe Cream Based Premium',  flavors:['Avocado','Charcoal','Choco Strawberry','Ube'], sizes:[{label:'16oz',price:69},{label:'22oz',price:79}] },
-    { name:'Frappe PREMIUM', flavors:['Nutella','Biscoff'], sizes:[{label:'22oz',price:99}] },
+    { name:'Frappe Cream Base 2',  flavors:['Avocado','Charcoal','Choco Strawberry','Ube'], sizes:[{label:'16oz',price:69},{label:'22oz',price:79}] },
+    { name:'Frappe Premium', flavors:['Nutella','Biscoff'], sizes:[{label:'22oz',price:99}] },
     { name:'Frappe Coffee Based', flavors:['Almond Coffee','Caramel Macchiato','Coffee Jelly','Hazelnut Coffee','Matcha Espresso','Vanilla Coffee'], sizes:[{label:'16oz',price:69},{label:'22oz',price:79}] },
     { name:'Frappe Cheese Cake', flavors:['Cookies & Cream','Dark Choco','Matcha','Milo','Strawberry','Taro','Winter Melon'], sizes:[{label:'22oz',price:99}] }
   ]},
@@ -543,10 +543,10 @@ const MENU = [
     { name:'Ice Cream Float', flavors:['Soda','Coffee','Milk Tea'], sizes:[{label:'16oz',price:69},{label:'22oz',price:79}] }
   ]},
   { category:'Snacks', emoji:'🍪', items:[
-    { name:'Muffin', flavors:['Original'], sizes:[{label:'1pc',price:50}] },
-    { name:'Cookies', flavors:['Regular'], sizes:[{label:'1pc Regular',price:28}] },
-    { name:'Premium Cookies',  flavors:['Original'], sizes:[{label:'1pc', price:50}] },
-    { name:'Nori Seaweed', flavors:['Original'], sizes:[{label:'1pc',price:18},{label:'3pcs',price:50}] }
+    { name:'Muffin', flavors:['Original'], sizes:[{label:'1pc',price:40}] },
+    { name:'Cookie', flavors:['Original'], sizes:[{label:'1pc',price:28}] },
+    { name:'Premium Cookie', flavors:['Original'], sizes:[{label:'1pc',price:50}] },
+    { name:'Nori Seaweed', flavors:['Original'], sizes:[{label:'1pc',price:20},{label:'3pcs',price:50}] }
   ]}
 ];
 
@@ -1159,17 +1159,37 @@ function deleteTransactionAt(idx){
 // ── SERVICE WORKER (offline support) ──────────────────────
 if('serviceWorker' in navigator){
   const sw=`
-const CACHE='babybubble-v1';
-const FILES=['/baby-bubble-pos/','/baby-bubble-pos/index.html'];
-self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES))));
-self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{
-  const clone=res.clone();
-  caches.open(CACHE).then(c=>c.put(e.request,clone));
-  return res;
-}).catch(()=>caches.match('/baby-bubble-pos/index.html')))));
+const CACHE='babybubble-v2';
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.add(self.location.href))
+  );
+  self.skipWaiting();
+});
+self.addEventListener('activate', e => {
+  e.waitUntil(caches.keys().then(keys =>
+    Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+  ));
+  self.clients.claim();
+});
+self.addEventListener('fetch', e => {
+  e.respondWith(
+    caches.match(e.request).then(r => r || fetch(e.request).then(res => {
+      const clone = res.clone();
+      caches.open(CACHE).then(c => c.put(e.request, clone));
+      return res;
+    })).catch(() => caches.match(self.location.href))
+  );
+});
   `;
   const blob=new Blob([sw],{type:'application/javascript'});
-  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+  const swUrl=URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).then(reg=>{
+    reg.addEventListener('updatefound',()=>{
+      showSaveIndicator('📦 Offline cache updated');
+    });
+    showSaveIndicator('✓ Offline ready');
+  }).catch(()=>{});
 }
 </script>
 </body>
